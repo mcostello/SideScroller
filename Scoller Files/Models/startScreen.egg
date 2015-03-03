@@ -1,0 +1,55 @@
+<CoordinateSystem> { Z-Up }
+
+<Texture> Tex1 {
+  "../Textures/start_screen.jpg"
+  <Scalar> format { rgb }
+  <Scalar> wrapu { repeat }
+  <Scalar> wrapv { repeat }
+  <Scalar> minfilter { linear_mipmap_linear }
+  <Scalar> magfilter { linear }
+  <Scalar> envtype { modulate }
+}
+<Group> "Scene Root" {
+  <Group> Plane001 {
+    <Transform> {
+      <Matrix4> {
+        1 0 0 0
+        0 -4.37114e-008 1 0
+        0 -1 -4.37114e-008 0
+        0 0 0 1
+      }
+    }
+    <VertexPool> Plane001.verts {
+      <Vertex> 0 {
+        -51.2 -1.67852e-006 38.4
+        <UV> { 0 1 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+      <Vertex> 1 {
+        -51.2 1.67852e-006 -38.4
+        <UV> { 0 0 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+      <Vertex> 2 {
+        51.2 -1.67852e-006 38.4
+        <UV> { 1 1 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+      <Vertex> 3 {
+        51.2 1.67852e-006 -38.4
+        <UV> { 1 0 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+    }
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { Tex1 }
+      <VertexRef> { 0 1 2 <Ref> { Plane001.verts } }
+    }
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { Tex1 }
+      <VertexRef> { 3 2 1 <Ref> { Plane001.verts } }
+    }
+  }
+}

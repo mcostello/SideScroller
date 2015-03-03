@@ -1,0 +1,55 @@
+<CoordinateSystem> { Z-Up }
+
+<Texture> Tex1 {
+  "../Textures/enemy_mine.tif"
+  <Scalar> format { rgba }
+  <Scalar> wrapu { repeat }
+  <Scalar> wrapv { repeat }
+  <Scalar> minfilter { linear_mipmap_linear }
+  <Scalar> magfilter { linear }
+  <Scalar> envtype { modulate }
+}
+<Group> "Scene Root" {
+  <Group> Plane011 {
+    <Transform> {
+      <Matrix4> {
+        1 0 0 0
+        0 -4.37114e-008 1 0
+        0 -1 -4.37114e-008 0
+        0 0 0 1
+      }
+    }
+    <VertexPool> Plane011.verts {
+      <Vertex> 0 {
+        -0.8 -3.49691e-008 0.8
+        <UV> { 0 1 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+      <Vertex> 1 {
+        -0.8 3.49691e-008 -0.8
+        <UV> { 0 0 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+      <Vertex> 2 {
+        0.8 -3.49691e-008 0.8
+        <UV> { 1 1 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+      <Vertex> 3 {
+        0.8 3.49691e-008 -0.8
+        <UV> { 1 0 }
+        <Normal> { 0 -1 -4.37114e-008 }
+      }
+    }
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { Tex1 }
+      <VertexRef> { 0 1 2 <Ref> { Plane011.verts } }
+    }
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { Tex1 }
+      <VertexRef> { 3 2 1 <Ref> { Plane011.verts } }
+    }
+  }
+}
