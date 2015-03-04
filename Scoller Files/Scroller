@@ -1,0 +1,207 @@
+""" A Collaboratively-Coded Clone of Flappy Bird """
+
+import pygame
+import random
+import time
+
+class DrawableSurface():
+    """ A class that wraps a pygame.Surface and a pygame.Rect """
+    def __init__(self, surface, rect):
+        """ Initialize the drawable surface """
+        self.surface = surface
+        self.rect = rect
+
+    def get_surface(self):
+        """ Get the surface """
+        return self.surface
+
+    def get_rect(self):
+        """ Get the rect """
+        return self.rect
+
+class Bird():
+    """ represents the state of the player in the game """
+    def __init__(self, pos_x, pos_y):
+        self.image = pygame.image.load('images/olin_o.png')
+        self.image.set_colorkey((255,255,255))
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.vel_y = 0
+
+    def update(self):
+        pygame.event.pump()
+        self.pos_x += 0
+        if (pygame.key.get_pressed()[pygame.K_w]):
+            self.pos_y -= 1
+        else:
+            self.pos_y += 0
+        if (pygame.key.get_pressed()[pygame.K_a]):
+            self.pos_x -= 1
+        else:
+            self.pos_x += 0
+        if (pygame.key.get_pressed()[pygame.K_d]):
+            self.pos_x += 1
+        else:
+            self.pos_x += 0
+        if (pygame.key.get_pressed()[pygame.K_s]):
+            self.pos_y += 1
+        else:
+            self.pos_y += 0
+        #self.vel_y += 0
+        #if (pygame.key.get_pressed()[pygame.K_SPACE]):
+            
+
+        
+    #def flap(self):
+    #    self.pos_y += 1
+
+    def get_drawables(self):
+        w,h = self.image.get_size()
+        return [DrawableSurface(self.image, pygame.Rect(self.pos_x,
+                                                        self.pos_y,
+                                                        w,
+                                                        h))]
+
+class Background():
+    """ Represents the background (at first just the ground) """
+    def __init__(self,width,height):
+        self.image = pygame.image.load('images/plant_tile.png')
+        self.height = height
+
+    def get_drawables(self):
+        """ Gets the drawables for the background """
+        drawables = []
+        for i in range(100):
+            drawables.append(DrawableSurface(self.image,
+                                             pygame.Rect(i*32,self.height - 32,32,32)))
+        return drawables
+
+    def collided_with(self, entity):
+        """ Returns True iff the input drawable surface (entity) has
+            collided with the ground """
+        drawables = self.get_drawables()
+        rectangles = []
+        for d in drawables:
+            rectangles.append(d.get_rect())
+        return entity.get_rect().collidelist(rectangles) != -1
+
+class FlappyModel():
+    """ Represents the game state of our Flappy bird clone """
+    def __init__(self, width, height):
+        """ Initialize the flappy model """
+        self.width = width
+        self.height = height
+        self.background = Background(width, height)
+        self.bird = Bird(0,200)
+
+    def get_drawables(self):
+        """ Return a list of DrawableSurfaces for the model """
+        return self.bird.get_drawables() + self.background.get_drawables()
+
+    def is_dead(self):
+        """ Return True if the player is dead (for instance) the player
+            has collided with an obstacle, and false otherwise """
+        # TODO: modify this if the player becomes more complicated
+        player_rect = self.bird.get_drawables()[0]
+        return self.background.collided_with(player_rect)
+
+    def update(self):
+        """ Updates the model and its constituent parts """
+        self.bird.update()
+
+class FlappyView():
+    def __init__(self, g_model, b_model, width, height):
+        """ Initialize the view for Flappy Bird.  The input model
+            is necessary to find the position of relevant objects
+            to draw. """
+        pygame.init()
+        # to retrieve width and height use screen.get_size()
+        self.screen = pygame.display.set_mode((width, height))
+        # this is used for figuring out where to draw stuff
+        self.game_model = g_model
+        self.bullet_model = b_model
+
+    def draw(self):
+        """ Redraw the full game window """
+        self.screen.fill((0,51,102))
+        # get the new drawables
+        self.drawables = self.game_model.get_drawables() + self.bullet_model.get_drawables()
+        for d in self.drawables:
+            rect = d.get_rect()
+            surf = d.get_surface()
+            self.screen.blit(surf, rect)
+        pygame.display.update()
+
+class Bullet():
+    """ represents the state of the player in the game """
+    def __init__(self, bpos_x, bpos_y):
+        self.image = pygame.image.load('images/largeyellowstar.jpg')
+        self.image.set_colorkey((255,255,255))
+        self.bpos_x = bpos_x
+        self.bpos_y = bpos_y
+        #self.bvel_y = 0
+        
+    def update(self):
+        # change to moving the bullet across the screen
+        self.bpos_x += 1
+
+    def get_drawables(self):
+      # return a sprite to draw
+        return DrawableSurface(self.image, pygame.Rect((self.bpos_x, self.bpos_y), self.image.get_size()))
+        
+class BulletModel():
+    """ Represents the game state of our Flappy bird clone """
+    def __init__(self, width, height, bird):
+        """ Initialize the flappy model """
+        self.width = width
+        self.height = height
+        self.bpos_x = bird.pos_x
+        self.bpos_y = bird.pos_y
+        self.background = Background(width, height)
+        self.bullets = []
+        self.bullets.append(Bullet(bird.pos_x,bird.pos_y))
+    def get_drawables(self):
+        print(len(self.bullets))
+        """ Return a list of DrawableSurfaces for the model """
+        return [bullet.get_drawables() for bullet in self.bullets] + self.background.get_drawables()
+
+    def is_dead(self):
+        """ Return True if the player is dead (for instance) the playerss
+            has collided with an obstacle, and false otherwise """
+        # TODO: modify this if the player becomes more complicated
+        bullet_rect = self.bullet.get_drawables()[0]
+        return self.background.collided_with(bullet_rect)
+
+    def update(self):
+        """ Updates the model and its constituent parts """
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.bullets.append(Bullet(self.bpos_x, self.bpos_y))
+        for bullet in self.bullets:
+            bullet.update()
+
+
+
+class FlappyBird():
+    """ The main Flappy Bird class """
+
+    def __init__(self):
+        """ Initialize the flappy bird game.  Use FlappyBird.run to
+            start the game """
+        self.game_model = FlappyModel(640, 480)
+        self.bullet_model = BulletModel(20, 20, self.game_model.bird)
+        self.view = FlappyView(self.game_model, self.bullet_model, 640, 480)
+
+    def run(self):
+        """ the main runloop... loop until death """
+        last_update_time = time.time()
+        while not(self.game_model.is_dead()):
+            self.game_model.update()
+            self.bullet_model.update()
+            self.view.draw()
+            last_update_time = time.time()
+
+if __name__ == '__main__':
+    flappy = FlappyBird()
+    flappy.run()
