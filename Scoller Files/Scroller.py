@@ -1,8 +1,10 @@
-""" A basic Side-Scroller Shooting Game """
+""" A  basic Side-Scroller Shooting Game """
 
-import pygame
 import random
 import time
+
+import pygame
+
 
 class DrawableSurface():
     """ A class that wraps a pygame.Surface and a pygame.Rect """
@@ -32,27 +34,17 @@ class Plane():
         self.pos_x += 0
         if (pygame.key.get_pressed()[pygame.K_w]):
             self.pos_y -= 1
-        else:
-            self.pos_y += 0
         if (pygame.key.get_pressed()[pygame.K_a]):
             self.pos_x -= 1
-        else:
-            self.pos_x += 0
         if (pygame.key.get_pressed()[pygame.K_d]):
             self.pos_x += 1
-        else:
-            self.pos_x += 0
         if (pygame.key.get_pressed()[pygame.K_s]):
             self.pos_y += 1
-        else:
-            self.pos_y += 0
 
     def get_drawables(self):
         w,h = self.image.get_size()
-        return [DrawableSurface(self.image, pygame.Rect(self.pos_x,
-                                                        self.pos_y,
-                                                        w,
-                                                        h))]
+        return [DrawableSurface(self.image, 
+                                pygame.Rect(self.pos_x, self.pos_y, w, h))]
 
 class Background():
     """ Represents the background (at first just the ground) """
@@ -87,11 +79,11 @@ class Bullet():
         self.bpos_y = bpos_y + 50
         
     def update(self):
-        # change to moving the bullet across the screen
+        """ change to moving the bullet across the screen """
         self.bpos_x += 3
 
     def get_drawables(self):
-      # return a sprite to draw
+        """ return a sprite to draw """
         return DrawableSurface(self.image, pygame.Rect((self.bpos_x, self.bpos_y), self.image.get_size()))
 
 class Enemy():
@@ -117,6 +109,7 @@ class ScrollerModel():
         self.background = Background(width, height)
         self.bullets = []
         self.bullets.append(Bullet(self.plane.pos_x,self.plane.pos_y))
+
     def get_plane_drawables(self):
         """ Return a list of DrawableSurfaces for the model """
         return self.plane.get_drawables() + self.background.get_drawables()
@@ -132,7 +125,7 @@ class ScrollerModel():
         return self.background.collided_with(player_rect)
 
     def is_bullet_dead(self):
-        """ Return True if the player is dead (for instance) the playerss
+        """ Return True if the player is dead (for instance) the players
             has collided with an obstacle, and false otherwise """
         bullet_rect = self.bullet.get_drawables()[0]
         return self.background.collided_with(bullet_rect)
@@ -145,7 +138,7 @@ class ScrollerModel():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    print len(self.bullets)
+                    # print len(self.bullets)
                     self.bullets.append(Bullet(self.plane.pos_x, self.plane.pos_y))
         for bullet in self.bullets:
             bullet.update()
