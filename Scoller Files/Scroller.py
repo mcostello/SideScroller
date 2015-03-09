@@ -21,9 +21,11 @@ class DrawableSurface():
         """ Get the rect """
         return self.rect
 
-class Plane():
+class Plane(pygame.sprite.Sprite):
     """ represents the state of the player in the game """
     def __init__(self, pos_x, pos_y):
+        pygame.sprite.Sprite.__init__(self)
+
         self.image = pygame.image.load('images/biplane.png')
         self.pos_x = pos_x
         self.pos_y = pos_y
@@ -56,13 +58,17 @@ class Background():
     def get_drawables(self):
         """ Gets the drawables for the background """
         drawables = []
-        for i in range(100):
+        for i in range(3):
             drawables.append(DrawableSurface(self.image,
                                              pygame.Rect(i*1024,self.height - 128,1024,128)))
         return drawables
 
+    def update(self):
+        """update the background to move at a constant rate"""
+        pass
+
     def collided_with(self, entity):
-        """ Returns True iff the input drawable surface (entity) has
+        """ Returns True if the input drawable surface (entity) has
             collided with the ground """
         drawables = self.get_drawables()
         rectangles = []
@@ -70,9 +76,10 @@ class Background():
             rectangles.append(d.get_rect())
         return entity.get_rect().collidelist(rectangles) != -1
 
-class Bullet():
+class Bullet(pygame.sprite.Sprite):
     """ represents the state of the player in the game """
     def __init__(self, bpos_x, bpos_y):
+        pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('images/bullet.png')
         self.image.set_colorkey((255,255,255))
         self.bpos_x = bpos_x + 200
@@ -86,7 +93,7 @@ class Bullet():
         """ return a sprite to draw """
         return DrawableSurface(self.image, pygame.Rect((self.bpos_x, self.bpos_y), self.image.get_size()))
 
-class Enemy():
+class Enemy(pygame.sprite.Sprite):
     pass
     #     """ represents the states of the enemies in the game """
     #     def __init__(self, pos_x, pos_y):
@@ -121,7 +128,7 @@ class ScrollerModel():
     def is_player_dead(self):
         """ Return True if the player is dead (for instance) the player
             has collided with an obstacle, and false otherwise """
-        player_rect = self.get_bullet_drawables()[0]
+        player_rect = self.plane.get_drawables()[0]
         return self.background.collided_with(player_rect)
 
     def is_bullet_dead(self):
@@ -135,13 +142,21 @@ class ScrollerModel():
         self.plane.update()
 
     def bullet_update(self):
+        """checks for creation of a bullet. If bullet created, add bullet to
+        a list of bullets"""
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    # print len(self.bullets)
+                    print len(self.bullets)
                     self.bullets.append(Bullet(self.plane.pos_x, self.plane.pos_y))
         for bullet in self.bullets:
             bullet.update()
+            if bullet.bpos_x > 1280:
+                self.bullets = self.bullets[1:]
+
+    def background_update(self):
+        """Updates the background"""
+        self.background.update()
 
 class ScrollerView():
     def __init__(self, s_model, width, height):
@@ -181,6 +196,7 @@ class SideScroller():
         while not(self.game_model.is_player_dead()):
             self.game_model.plane_update()
             self.game_model.bullet_update()
+            self.game_model.background_update()
             self.view.draw()
             last_update_time = time.time()
             pygame.display.update()
