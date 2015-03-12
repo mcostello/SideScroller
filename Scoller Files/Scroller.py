@@ -178,7 +178,7 @@ class ScrollerModel():
     def is_bullet_dead(self):
         """ Return True if the player is dead (for instance) the players
             has collided with an obstacle, and false otherwise """
-        bullet_rect = self.bullet.get_drawables()[0].get_rect()
+        bullet_rect = self.bullets.get_drawables()[0].get_rect()
         return self.enemies.collided_with(bullet_rect)
 
     def is_enemy_dead(self):
@@ -211,7 +211,9 @@ class ScrollerModel():
             bullet.update()
         if len(self.bullets) > 0 and self.bullets[0].bpos_x > 1280:
             self.bullets = self.bullets[1:]
-
+        # elif (self.is_bullet_dead()):
+            # self.bullets = self.bullets[1:]
+            
     def background_update(self):
         """Updates the background"""
         for background in self.background:
@@ -235,7 +237,7 @@ class ScrollerView():
         self.screen.fill((0,51,102))
         # get the new drawables
         self.drawables = (self.game_model.get_plane_drawables()
-                        + self.game_model.get_background_drawables() 
+                        #+ self.game_model.get_background_drawables() 
                         + self.game_model.get_bullet_drawables()
                         + self.game_model.get_enemy_drawables())
         for d in self.drawables:
