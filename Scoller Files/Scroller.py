@@ -58,8 +58,8 @@ class Background(pygame.sprite.Sprite):
 
     def get_drawables(self):
         """ Gets the drawables for the background """
-        return [DrawableSurface(self.image,
-                                pygame.Rect((self.pos_x, self.height - 128), self.image.get_size()))]
+        return DrawableSurface(self.image,
+                                pygame.Rect((self.pos_x, self.height - 128), self.image.get_size()))
 
     def update(self):
         """ update the background to move at a constant rate"""
@@ -127,7 +127,17 @@ class Enemy(pygame.sprite.Sprite):
     def is_dead(self, bullet_list):
         enemy_rect = self.get_drawables().get_rect()
         bullet_rects = [bullet.get_drawables().get_rect() for bullet in bullet_list]
-        return (enemy_rect.collidelist(bullet_rects) != -1)# or background.collided_with(enemy_rect)
+            #bullet_list  
+        #print bullet_list, enemy_rect.collidelist(bullet_rects)
+
+        #if len(bullet_list) > 0 and enemy_rect.collidelist(bullet_rects):
+            # print enemy_rect.collidelist(bullet_rects)
+            # print (enemy_rect.collidelist(bullet_rects) != -1), bullet
+        for bullet in bullet_rects:
+            if enemy_rect.collidelist([bullet]) == 0 and len(bullet_list)>0:
+                return ((enemy_rect.collidelist(bullet_rects) != -1),bullet)
+        # print enemy_rect.collidelist(bullet_rects)
+        #return (enemy_rect.collidelist(bullet_rects) != -1)# or background.collided_with(enemy_rect)
 
 class ScrollerModel():
     """ Represents the game state of the scroller """
@@ -139,6 +149,16 @@ class ScrollerModel():
         self.background = [Background(0),Background(1024),Background(2048)]
         self.bullets = []
         self.enemies = [Enemy(1080, randint(100,356))]
+        self.counter = 0
+        # self.counterText = ''
+        # self.screen = ScrollerView()
+
+
+    def scorekeep(self):
+        #self.counter += 1
+        # print self.counter
+        return "Hello!"#str(self.counter)
+
 
     def update(self):
         events = pygame.event.get()
@@ -146,6 +166,8 @@ class ScrollerModel():
         self.bullet_update(events)
         self.background_update()
         self.enemy_update(events)
+        #ScrollerView.texts(self.scorekeep())
+
 
     def get_plane_drawables(self):
         """ Return a list of DrawableSurfaces for the model """
@@ -172,7 +194,7 @@ class ScrollerModel():
             if enemy.collided_with(player_rect):
                 return True
 
-        # bg_rects = [d.get_rect() for d in self.background.get_drawables()]
+        # bg_rects = d.get_rect() for d in self.background.get_drawables()
         # return player_rect.collidelist(bg_rects) != -1
 
     def is_bullet_dead(self):
@@ -190,15 +212,29 @@ class ScrollerModel():
         self.plane.update()
 
     def enemy_update(self, events):
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_k:
-                    pass# self.enemies.append(Enemy(1080, randint(0,256)))
+                    self.enemies.append(Enemy(1080, randint(0,256)))
         for enemy in self.enemies:
             enemy.update()
             if enemy.pos_x < 0 or enemy.is_dead(self.bullets):
+                bullet_index = (i for i,x in self.bullets if x == [enemy.is_dead(self.bullets)[1]])
+                #print bullet_index# [i for i, x in enumerate(self.bullets) if x = [enemy.is_dead(self.bullets)[1]]
+                # del self.bullets[bullet_index]
                 self.enemies = self.enemies[1:]
                 self.enemies.append(Enemy(1280, randint(100,356)))
+                self.counter += 1
+                #self.counterText += str(self.counter)
+
+                #this is where the score can be counted easiest, so its where we are doing it.
+                #font = pygame.font.Font(None, 36)
+                #print str(self.counter)
+                #text = font.render(str(self.counter), 1, (10, 10, 10))
+                #textpos = text.get_rect()
+                #textpos.centerx = (0,200)
+                #ScrollerView.screen.blit(text, (10,200))
 
     def bullet_update(self, events):
         """checks for creation of a bullet. If bullet created, add bullet to
@@ -213,7 +249,7 @@ class ScrollerModel():
             self.bullets = self.bullets[1:]
         # elif (self.is_bullet_dead()):
             # self.bullets = self.bullets[1:]
-            
+
     def background_update(self):
         """Updates the background"""
         for background in self.background:
@@ -236,8 +272,9 @@ class ScrollerView():
         """ Redraw the full game window """
         self.screen.fill((0,51,102))
         # get the new drawables
-        self.drawables = (self.game_model.get_plane_drawables()
-                        #+ self.game_model.get_background_drawables() 
+        self.drawables = (self.game_model.get_background_drawables()
+                        + self.game_model.get_plane_drawables()
+                        # + self.game_model.get_background_drawables() 
                         + self.game_model.get_bullet_drawables()
                         + self.game_model.get_enemy_drawables())
         for d in self.drawables:
@@ -245,6 +282,11 @@ class ScrollerView():
             surf = d.get_surface()
             surf.set_colorkey((255,255,255))
             self.screen.blit(surf, rect)
+
+    def texts(self):#, score):
+        font=pygame.font.Font(None,30)
+        scoretext=font.render("Score:", 1,(255,255,255))
+        self.screen.blit(scoretext, (500, 457))
 
 class SideScroller():
     """ The main SideScroller class """
@@ -254,6 +296,7 @@ class SideScroller():
             start the game """
         self.game_model = ScrollerModel(1280, 480)
         self.view = ScrollerView(self.game_model, 1280, 480)
+        # x = ScrollerModel.scorekeep()
 
     def run(self):
         """ the main runloop... loop until death """
@@ -261,6 +304,8 @@ class SideScroller():
         while not(self.game_model.is_player_dead()):
             self.game_model.update()
             self.view.draw()
+            # print ScrollerModel.scorekeep
+            self.view.texts()#ScrollerModel.scorekeep())
             last_update_time = time.time()
             pygame.display.update()
 
